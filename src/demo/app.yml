@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Test lambda 
+  Last Modified: 07-21-2022
+  Author: Amit Heda
+
+Parameters:
+  VpcID:
+    Description: VPC ID to create the stack
+    Type: String
+
+  SubnetA:
+    Description: SubnetID to create the stack
+    Type: String
+  SubnetB:
+    Description: SubnetID to create the stack
+    Type: String  
+  EnvironmentName:
+    Description: Environment Name
+    Type: String
+
+  ProjectName:
+    Description: Project Name
+    Type: String
+  
+  LambdaHostSecurityGroup:
+    Description: Lambda Host Security Group
+    Type: String
+  
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-Demo-Lambda-Role-${EnvironmentName}
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-Demo-Lambda-Role-${EnvironmentName}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: !Sub ${ProjectName}-Demo-Lambda-LoggingPolicy-${EnvironmentName}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:PutRetentionPolicy
+                  - logs:DeleteRetentionPolicy
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:logs:*:*:*
+              - Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:s3:::*
+        - PolicyName: !Sub ${ProjectName}-Demo-Lambda-VPCPolicy-${EnvironmentName}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:UnassignPrivateIpAddresses
+                Effect: Allow
+                Resource:
+                  - "*"
+        - PolicyName: !Sub  ${ProjectName}-Demo-Lambda-AmazonS3ObjectLambdaExecutionRolePolicy-${EnvironmentName}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - s3-object-lambda:WriteGetObjectResponse
+                Effect: Allow
+                Resource:
+                  - "*"
+        - PolicyName: !Sub ${ProjectName}-Demo-Lambda-SecretsManagerPolicy-${EnvironmentName}
+          PolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                  - Action:
+                      - secretsmanager:GetResourcePolicy
+                      - secretsmanager:GetSecretValue
+                      - secretsmanager:DescribeSecret
+                      - secretsmanager:ListSecretVersionIds
+                    Effect: Allow
+                    Resource: 
+                      - "arn:aws:secretsmanager:us-west-2:725917462874:secret:Production/spread/dbSecret-Lqk2Na"              
+                      - "arn:aws:secretsmanager:us-west-2:725917462874:secret:Spread-App/Spreadservice-WlKk1s"
+  AIGPUWatcherLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-Demo-${EnvironmentName}
+      Description: Demo Lambda 
+      PackageType: Image
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Tags:
+        Name: !Sub ${ProjectName}-Demo-${EnvironmentName}
+      MemorySize: 1024
+      Timeout: 300
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaHostSecurityGroup
+        SubnetIds:
+          - !Ref SubnetA
+          - !Ref SubnetB
+          - !Ref SubnetC
+          - !Ref SubnetD
+      Environment:
+        Variables:
+          SKATCH_SECRETS: "abc"
+          SKATCH_DB_SECRETS: "abc"
+    Metadata:
+      DockerTag: demo.v1
+      DockerContext: ./
+      Dockerfile: Dockerfile         
+      

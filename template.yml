@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Description: >
+  Template description
+  Last Modified: 
+  Author: Amit Heda
+
+Parameters:
+  EnvironmentName:
+    Description: Environment Name
+    Type: String
+  ProjectName:
+    Description: Project Name
+    Type: String
+  VpcID:
+    Type: String
+  SubnetA:
+    Description: SubnetID to create the stack
+    Type: String
+  SubnetB:
+    Description: SubnetID to create the stack
+    Type: String
+  SubnetC:
+    Description: SubnetID to create the stack
+    Type: String 
+  SubnetD:
+    Description: SubnetID to create the stack
+    Type: String
+
+
+Resources: 
+  LambdaHostSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for the Lambda
+      GroupName: !Sub SG-${ProjectName}-Lambda-${EnvironmentName}
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: "-1"
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub SG-${ProjectName}-Lambda-${EnvironmentName}
+ 
+  demo:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./src/demo/app.yml
+      Parameters:
+        VpcID: !Ref VpcID
+        SubnetA: !Ref SubnetA
+        SubnetB: !Ref SubnetB
+        SubnetC: !Ref SubnetC
+        SubnetD: !Ref SubnetD
+        EnvironmentName: !Ref EnvironmentName
+        ProjectName: !Ref ProjectName
+        LambdaHostSecurityGroup: !Ref LambdaHostSecurityGroup
