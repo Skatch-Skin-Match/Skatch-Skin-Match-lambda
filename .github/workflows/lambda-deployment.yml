@@ -1,0 +1,21 @@
+name: Prod Deployment Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  development:
+    uses: Skatch-Skin-Match/skatch-aws-infrastructure/.github/workflows/dev.sam.yml@main
+    with:
+      apiName: Lambda
+      applicationName: Skatch
+      region: "us-west-2"
+      tags: "Environment=Production ApplicationName=Skatch-App Name=Skatch-App CreatedBy=amit.heda"
+      parameters: "EnvironmentName=Production"
+      environment: "production"
+      srcDir: "./src/"
+      deploy: true
+    secrets: inherit
+   
+     
