@@ -6,7 +6,7 @@ on:
 
 jobs:
   development:
-    uses: Skatch-Skin-Match/skatch-aws-infrastructure/.github/workflows/dev.sam.yml@main
+    uses: Skatch-Skin-Match/skatch-aws-infrastructure/.github/workflows/dev.samdocker.yml@main
     with:
       apiName: Lambda
       applicationName: Skatch
@@ -15,6 +15,7 @@ jobs:
       parameters: "EnvironmentName=Production"
       environment: "production"
       srcDir: "./src/"
+      repositoryName: 'skatch/demo/python3.9'
       deploy: true
     secrets: inherit
    
