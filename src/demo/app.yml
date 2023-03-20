@@ -9,25 +9,27 @@ Parameters:
   VpcID:
     Description: VPC ID to create the stack
     Type: String
-
   SubnetA:
     Description: SubnetID to create the stack
     Type: String
   SubnetB:
     Description: SubnetID to create the stack
     Type: String  
+  SubnetC:
+    Description: SubnetID to create the stack
+    Type: String  
+  SubnetD:
+    Description: SubnetID to create the stack
+    Type: String      
   EnvironmentName:
     Description: Environment Name
     Type: String
-
   ProjectName:
     Description: Project Name
     Type: String
-  
   LambdaHostSecurityGroup:
     Description: Lambda Host Security Group
     Type: String
-
   ImageUri:
     Description: Lambda Docker image uri
     Type: String
