@@ -27,6 +27,10 @@ Parameters:
   LambdaHostSecurityGroup:
     Description: Lambda Host Security Group
     Type: String
+
+  ImageUri:
+    Description: Lambda Docker image uri
+    Type: String
   
 Resources:
   LambdaExecutionRole:
@@ -102,7 +106,7 @@ Resources:
                     Resource: 
                       - "arn:aws:secretsmanager:us-west-2:725917462874:secret:Production/spread/dbSecret-Lqk2Na"              
                       - "arn:aws:secretsmanager:us-west-2:725917462874:secret:Spread-App/Spreadservice-WlKk1s"
-  AIGPUWatcherLambda:
+  DemoLambda:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${ProjectName}-Demo-${EnvironmentName}
@@ -125,8 +129,4 @@ Resources:
         Variables:
           SKATCH_SECRETS: "abc"
           SKATCH_DB_SECRETS: "abc"
-    Metadata:
-      DockerTag: demo.v1
-      DockerContext: ./
-      Dockerfile: Dockerfile         
-      
+      ImageUri: !Ref ImageUri
