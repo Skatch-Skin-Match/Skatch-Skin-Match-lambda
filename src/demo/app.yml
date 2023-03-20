@@ -27,6 +27,10 @@ Parameters:
   LambdaHostSecurityGroup:
     Description: Lambda Host Security Group
     Type: String
+
+  ImageUri:
+    Description: Lambda Docker image uri
+    Type: String
   
 Resources:
   LambdaExecutionRole:
