@@ -36,7 +36,7 @@ Resources:
     Properties:
       GroupDescription: Security Group for the Lambda
       GroupName: !Sub SG-${ProjectName}-Lambda-${EnvironmentName}
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcID
       SecurityGroupIngress:
         - IpProtocol: "-1"
           FromPort: -1
