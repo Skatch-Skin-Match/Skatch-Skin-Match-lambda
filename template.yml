@@ -28,6 +28,9 @@ Parameters:
   SubnetD:
     Description: SubnetID to create the stack
     Type: String
+  ImageUri:
+    Description: Lambda Docker image uri
+    Type: String 
 
 
 Resources: 
@@ -64,3 +67,4 @@ Resources:
         EnvironmentName: !Ref EnvironmentName
         ProjectName: !Ref ProjectName
         LambdaHostSecurityGroup: !Ref LambdaHostSecurityGroup
+        ImageUri: !Ref ImageUri
