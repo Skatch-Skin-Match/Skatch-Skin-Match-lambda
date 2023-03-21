@@ -110,7 +110,7 @@ Resources:
                       - secretsmanager:ListSecretVersionIds
                     Effect: Allow
                     Resource: 
-                      - "Production/skatch/*"
+                      - "*"
   
   APIGWCloudWatchRole:
     Type: AWS::IAM::Role
