@@ -68,3 +68,10 @@ Resources:
         ProjectName: !Ref ProjectName
         LambdaHostSecurityGroup: !Ref LambdaHostSecurityGroup
         ImageUri: !Ref ImageUri
+
+
+Outputs:
+  DemoApi:
+    Description: Demo Api
+    Value: !Sub "https://${demo.Outputs.ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${EnvironmentName}/"
+   

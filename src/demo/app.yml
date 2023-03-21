@@ -33,6 +33,10 @@ Parameters:
   ImageUri:
     Description: Lambda Docker image uri
     Type: String
+  AllowedOrigin:
+    Description: Allowed Origin
+    Type: String
+    Default: "*"  
   
 Resources:
   LambdaExecutionRole:
@@ -106,8 +110,58 @@ Resources:
                       - secretsmanager:ListSecretVersionIds
                     Effect: Allow
                     Resource: 
-                      - "arn:aws:secretsmanager:us-west-2:725917462874:secret:Production/spread/dbSecret-Lqk2Na"              
-                      - "arn:aws:secretsmanager:us-west-2:725917462874:secret:Spread-App/Spreadservice-WlKk1s"
+                      - "Production/skatch/*"
+  
+  APIGWCloudWatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-Demo-CloudWatchRole--${EnvironmentName}
+
+  ApiGWAccount:
+    Type: "AWS::ApiGateway::Account"
+    Properties:
+      CloudWatchRoleArn: !GetAtt APIGWCloudWatchRole.Arn
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Sub ${EnvironmentName}
+      Name: !Sub ${ProjectName}-Demo-${EnvironmentName}
+      Description: Demo Api
+      EndpointConfiguration:
+        Type: REGIONAL
+      TracingEnabled: true
+      OpenApiVersion: "2.0"
+      Cors:
+        AllowMethods: "'OPTIONS,POST,GET,PUT'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowCredentials: true
+        AllowOrigin: !Sub "'${AllowedOrigin}'"
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          DataTraceEnabled: True
+          MetricsEnabled: True
+          LoggingLevel: INFO
+          ThrottlingBurstLimit: 5000
+          ThrottlingRateLimit: 10000
+      Tags:
+        Name: !Sub ${ProjectName}-Demo-${EnvironmentName}
+
+
   DemoLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -132,3 +186,14 @@ Resources:
           SKATCH_SECRETS: "abc"
           SKATCH_DB_SECRETS: "abc"
       ImageUri: !Ref ImageUri
+      Events:
+        GetDemo:
+            Type: Api
+            Properties:
+              Path: /demo
+              Method: GET
+              RestApiId: !Ref ApiGateway
+
+Outputs:
+  ApiGateway:
+    Value: !Ref ApiGateway
